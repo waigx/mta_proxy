@@ -40,7 +40,7 @@ class StationArrivalService(BaseHTTPRequestHandler):
 
         try:
             sa = StationArrivals(api_key, routes, stations)
-            trains = sa.directional_arrival(directions)
+            trains = sa.directional_arrival(directions, 10)
             responseJson = sa.format(trains)
             self._set_response()
             self.wfile.write(json.dumps(responseJson).encode(encoding='utf_8'))
@@ -48,5 +48,5 @@ class StationArrivalService(BaseHTTPRequestHandler):
             self._set_error_response(500)
             logging.error("Error Getting Trains Infos")
             logging.error(err)
-            self.wfile.write("Error Parsing request".encode(encoding='utf_8'))
+            self.wfile.write("Service Internal Error".encode(encoding='utf_8'))
             return

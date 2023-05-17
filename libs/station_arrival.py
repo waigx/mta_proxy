@@ -9,11 +9,23 @@ class Stations:
     S_7_AV = "F24S"
 
 class StationArrivals:
+    @staticmethod
+    def __unique_route_id_feeds(route_ids):
+        route_id_2_url_dict = NYCTFeed._train_to_url
+        url_2_route_id = {
+            feed: route_id
+            for route_id, feed in route_id_2_url_dict.items()
+        }
+        feeds = set(map(route_id_2_url_dict.get, route_ids))
+        return [url_2_route_id[feed] for feed in feeds]
+
     def __init__(self, api_key, route_ids, station_ids):
         print(api_key, route_ids, station_ids)
+        unique_route_ids_for_feeds = self.__unique_route_id_feeds(route_ids)
+        print(unique_route_ids_for_feeds)
         self.__route_ids = route_ids
         self.__station_ids = station_ids
-        self.__train_feeds = [NYCTFeed(route_id, api_key=api_key) for route_id in route_ids]
+        self.__train_feeds = [NYCTFeed(route_id, api_key=api_key) for route_id in unique_route_ids_for_feeds]
         self.__arrival_trains = []
 
     def directional_arrival(self, directions, length=5):
@@ -52,12 +64,16 @@ class StationArrivals:
     def format(self, trains):
         def format_train(train):
             arrival_time = self.__get_arrival_time_for_train(train)
-            arrival_delta_mins = int((arrival_time - datetime.now()).total_seconds()//60)
+            arrival_delta_in_secs = int((arrival_time - datetime.now()).total_seconds())
+            arrival_delta_in_mins = int(arrival_delta_in_secs//60)
             return {
                 "route_id": train.route_id,
                 "arrival_time": arrival_time.isoformat(),
-                "arrival_delta_mins": arrival_delta_mins,
-                "directions": train.direction,
+                "arrival_delta_in_mins": arrival_delta_in_mins,
+                "arrival_delta_in_secs": arrival_delta_in_secs,
+                "direction": train.direction,
+                "trip_id": train.trip_id,
+                "destination": train.headsign_text,
                 "extra": str(train)
             }
         return [format_train(t) for t in trains]
