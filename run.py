@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-from http.server import HTTPServer
+from http.server import ThreadingHTTPServer
 import logging
 from libs.station_arrival_service import StationArrivalService
 
 
-def run(server_class=HTTPServer, handler_class=StationArrivalService, port=8090):
+def run(server_class=ThreadingHTTPServer, handler_class=StationArrivalService, port=8090):
     logging.basicConfig(level=logging.INFO)
     server_address = ('', port)
     httpd = server_class(server_address, handler_class)
